@@ -9,6 +9,8 @@ USE_CYCLUS("mbmore" "StageConfig")
 USE_CYCLUS("mbmore" "CascadeConfig")
 USE_CYCLUS("mbmore" "CascadeEnrich")
 
+USE_CYCLUS("mbmore" "MultiIsotopeEnrich")
+
 USE_CYCLUS("mbmore" "RandomSink")
 USE_CYCLUS("mbmore" "StateInst")
 USE_CYCLUS("mbmore" "InteractRegion")

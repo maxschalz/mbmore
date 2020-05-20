@@ -1,0 +1,112 @@
+{
+  "simulation": {
+    "control": {
+      "duration": 5,
+      "startmonth": 1,
+      "startyear": 2020,
+      "simhandle": "Testing multi isotope enrichment",
+      "decay": "lazy"
+    },
+    "region": {
+      "name": "test_region",
+      "config": {"NullRegion": null},
+      "institution": {
+        "name": "test_institution",
+        "config": {"NullInst": null},
+        "initialfacilitylist": {
+          "entry": [
+            {"prototype": "my_source", "number": 1},
+            {"prototype": "heu_sink", "number": 1},
+            {"prototype": "tails_sink", "number": 1},
+            {"prototype": "my_enrichment", "number": 1}
+          ]
+        }
+      }
+    },
+    "archetypes": {
+      "spec": [
+        {"lib": "agents", "name": "NullRegion"},
+        {"lib": "agents", "name": "NullInst"},
+        {"lib": "cycamore", "name": "Source"},
+        {"lib": "cycamore", "name": "Sink"},
+        {"lib": "mbmore", "name": "CascadeEnrich"}
+      ]
+    },
+    "facility": [
+      {
+        "name": "my_source",
+        "config": {
+          "Source": {
+            "outcommod": "natU",
+            "outrecipe": "natU_recipe",
+            "throughput": 100
+          }
+        }
+      },
+      {
+        "name": "heu_sink",
+        "config": {
+          "Sink": {
+            "in_commods": {"val": "HEU"},
+            "recipe_name": "HEU_recipe"
+          }
+        }
+      },
+      {
+        "name": "tails_sink",
+        "config": {
+          "Sink": {
+            "in_commods": {"val": "depletedU"},
+            "recipe_name": "depletedU_recipe"
+          }
+        }
+      },
+      {
+        "name": "my_enrichment",
+        "config": {
+          "CascadeEnrich": {
+            "feed_commod": "natU",
+            "feed_recipe": "natU_recipe",
+            "product_commod": "HEU",
+            "tails_commod": "depletedU",
+            "design_product_assay": 0.9,
+            "design_tails_assay": 0.003
+         }
+        }
+      }
+    ],
+    "commodity": [
+      {"name": "natU", "solution_priority": 1},
+      {"name": "HEU", "solution_priority": 1},
+      {"name": "depletedU", "solution_priority": 1}
+    ],
+    "recipe": [
+      {
+        "name": "naturalU_recipe",
+        "basis": "mass",
+        "nuclide": [
+          {"id": "U234", "comp": 0.000055},
+          {"id": "U235", "comp": 0.00711},
+          {"id": "U238", "comp": 0.992835}
+          
+        ]
+      },
+      {
+        "name": "HEU_recipe",
+        "basis": "mass",
+        "nuclide": [
+          {"id": "U235", "comp": 0.9},
+          {"id": "U238", "comp": 0.1}
+        ]
+      },
+      {
+        "name": "depletedU_recipe",
+        "basis": "mass",
+        "nuclide": [
+          {"id": "U235", "comp": 0.003},
+          {"id": "U238", "comp": 0.997}
+        ]
+      }
+    ]
+  }
+}
