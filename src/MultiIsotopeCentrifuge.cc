@@ -40,7 +40,7 @@ MultiIsotopeCentrifuge::MultiIsotopeCentrifuge(
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-MultiIsotopeCentrifuge::ComputeDeltaU(double cut) {
+double MultiIsotopeCentrifuge::ComputeDeltaU(double cut) {
   // The naming of the variables partly follows Glaser 2009.
   const double radius = diameter / 2.;
   const double r2 = 0.975 * radius;  // Glaser 2009: between 0.96 and 0.99
@@ -61,9 +61,9 @@ MultiIsotopeCentrifuge::ComputeDeltaU(double cut) {
   // TODO CALCULATE ATOMIC MASS FROM FEED ASSAY
   double factor_a = -2. * M_PI * D_rho * molar_mass_238 / molar_mass
                     / std::log(r1_over_r2);
-  double A_p = factor_a * cut / feed / (1.+countercurrent_to_feed)
+  double A_p = factor_a * cut / machine_feed / (1.+countercurrent_to_feed)
                / (1.-cut+countercurrent_to_feed);
-  double A_w = factor_a * (1.-cut) / feed / countercurrent_to_feed
+  double A_w = factor_a * (1.-cut) / machine_feed / countercurrent_to_feed
                / (1.-cut+countercurrent_to_feed);
   
   // Calculate the optimum rectifier length, i.e., position of the feed point
@@ -73,7 +73,7 @@ MultiIsotopeCentrifuge::ComputeDeltaU(double cut) {
   
   double deltaU_1 = 0.5 * delta_molar_mass * std::pow(velocity,2.)
                     / gas_constant / temperature;
-  double deltaU_line1 = 0.5 * feed * cut * (1-cut) * std::pow(deltaU_1, 2.)
+  double deltaU_line1 = 0.5 * machine_feed * cut * (1-cut) * std::pow(deltaU_1, 2.)
                         * std::pow(r2/radius, 4.)
                         * std::pow(1. - std::pow(r1_over_r2, 2.), 2.);
   double deltaU_line2 = (1.+countercurrent_to_feed) / cut
