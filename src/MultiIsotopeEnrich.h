@@ -9,23 +9,23 @@
 namespace mbmore {
 
 class MultiIsotopeEnrich: public cyclus::Facility {
-#pragma cyclus note { \
-  "niche": "multi-component isotope enrichment facility", \
-  "doc": "MultiIsotopeEnrich is an enrichment facility tracking minor " \
-         "uranium isotopes, e.g. U234, as well. It is based on the " \
-         "CYCLUS module mbmore by Meghann McGerry, Baptiste Mouginot " \
-         "and Jordan Stomps." \
-}
  public:
   // --- Module Members ---
   /// Constructor for the MultiIsotopeEnrich class
   /// @param ctx the cyclus context for access to simulation-wide parameters
-  MultiIsotopeEnrich(cyclus::Context* ctx);
+  explicit MultiIsotopeEnrich(cyclus::Context* ctx);
 
   /// Destructor for the MultiIsotopeEnrich class
   virtual ~MultiIsotopeEnrich();
 
   #pragma cyclus
+  #pragma cyclus note { \
+    "niche": "multi-component isotope enrichment facility", \
+    "doc": "MultiIsotopeEnrich is an enrichment facility tracking minor " \
+           "uranium isotopes, e.g. U234, as well. It is based on the " \
+           "CYCLUS module mbmore by Meghann McGerry, Baptiste Mouginot " \
+           "and Jordan Stomps." \
+  }
   /// Print information about this agent
   virtual std::string str();
   // ---
@@ -79,11 +79,11 @@ class MultiIsotopeEnrich: public cyclus::Facility {
 
   /// --- Convert input file flows kg/mon to SI units ---
   inline double FlowPerSec(double flow_per_mon) {
-    return flow_per_mon / secpertimestep;
+    return flow_per_mon / sec_per_timestep;
   }
 
   inline double FlowPerDt(double flow_per_sec) {
-    return flow_per_sec * secpertimestep;
+    return flow_per_sec * sec_per_timestep;
   }
 
   inline double Mg2kgPerSec(double feed_mg_per_sec) {
@@ -126,8 +126,12 @@ class MultiIsotopeEnrich: public cyclus::Facility {
   /// @brief Record the enrichment with the cyclus::Recorder
   void RecordEnrichment_(double feed_qty);
 
-  MultiIsotopeCentrifuge centrifuge;
+  /* 
+  TODO 
   MultiIsotopeCascade cascade;
+  */
+  MultiIsotopeCentrifuge centrifuge;
+
   double precision = 1e-15;
   
   double sec_per_timestep = 60 * 60 * 24 * 365.25 / 12;
@@ -152,7 +156,7 @@ class MultiIsotopeEnrich: public cyclus::Facility {
     "default": 0, \
     "tooltip": "initial present uranium feed in kg", \
     "uilabel": "Initial Feed Inventory in kg", \
-    "doc": "Amount of uranium feed material stored at the enrichment " \
+    "doc": "Amount of uranium feed material stored at the enrichment " \
            "facility at the beginning of the simulation in kg." \
   }
   double initial_feed;
@@ -169,7 +173,7 @@ class MultiIsotopeEnrich: public cyclus::Facility {
   double max_feed_inventory;
 
   #pragma cyclus var { \
-    "default": 0.000015, \
+    "default": 100, \
     "tooltip": "design feed flow in kg/s", \
     "uilabel": "Design Feed Flow", \
     "doc": "Target amount of feed material to be processed by the " \
@@ -253,9 +257,9 @@ class MultiIsotopeEnrich: public cyclus::Facility {
     "default": 2.0, \
     "tooltip": "Centrifuge L/F* ", \
     "uilabel": "Centrifuge Countercurrent to Optimum Feed Ratio", \
-    "doc": "Countercurrent to optiumum feed ratio" \
+    "doc": "Countercurrent to optimum feed ratio" \
   }
-  double L_over_F;
+  double countercurrent_to_feed;
 
   #pragma cyclus var { \
     "default": 15.0, \
@@ -334,10 +338,13 @@ class MultiIsotopeEnrich: public cyclus::Facility {
   }
   std::string tails_commod;
   
-  #pragma cyclus var{}
-  cyclus::toolkit::ResBuf<cyclus::Material> inventory; // feed U
-  cyclus::toolkit::ResBuf<cyclus::Material> tails; // depleted U
-  
+  #pragma cyclus var { \
+    "capacity": "max_feed_inventory" \
+  }
+  cyclus::toolkit::ResBuf<cyclus::Material> inventory;  // feed inventory
+  #pragma cyclus var {}
+  cyclus::toolkit::ResBuf<cyclus::Material> tails;  // tails inventory
+
   // Used to total the intra-timestep SWU and feed U usage for meeting 
   // requests. These help to enable the time series generation.
   double intra_timestep_feed_;
