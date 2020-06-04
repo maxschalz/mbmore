@@ -1,89 +1,156 @@
-# include "MultiIsotopeHelper.h"
+#include "MultiIsotopeHelper.h"
+
+#include <algorithm>
+#include <map>
+#include <vector>
+
+#include "error.h"
+
+namespace mbmore {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-double MultiIsotopeAssayAtom(Material::Ptr rsrc) {
-  return MultiIsotopeAtomFrac(rsrc, 235);
+void IsotopesNucID(std::vector<int> &isotopes) {
+  isotopes = {232, 233, 234, 235, 236, 238};
+  for (int i = 0; i < isotopes.size(); i++) {
+    isotopes[i] = (92*1000 + isotopes[i]) * 10000;
+  }
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-double MultiIsotopeAssayMass(Material::Ptr rsrc) {
-  return MultiUraniumIsotopeMass(rsrc, 235);
+int IsotopeToNucID(int isotope) {
+  std::vector<int> isotopes = {232, 233, 234, 235, 236, 238};
+  std::vector<int>::iterator it;
+  
+  it = std::find(isotopes.begin(), isotopes.end(), isotope);
+  if (it == isotopes.end()) {
+    throw cyclus::ValueError("Invalid (non-uranium) isotope!");
+  }
+  return (92*1000 + isotope) * 10000;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-double MultiIsotopeAtomFrac(Composition::Ptr composition, int isotope) {
-  int nuc_id = (92*1000 + isotope) * 10000; // isotope to unique NucID
-  std::map<int, double> v = composition->atom();
-  compmath::Normalize(&v);
-  return v[nuc_id];
+int NucIDToIsotope(int nuc_id) {
+  std::vector<int> isotopes;
+  IsotopesNucID(isotopes);
+  std::vector<int>::iterator it;
+  
+  it = std::find(isotopes.begin(), isotopes.end(), nuc_id);
+  if (it == isotopes.end()) {
+    throw cyclus::ValueError("Invalid (non-uranium) isotope!");
+  }
+  return nuc_id/10000 - 92*1000;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-double MultiIsotopeAtomFrac(Material::Ptr rsrc, int isotope) {
-  MatQuery mq(rsrc);
-  const int isotopes[6] = {232, 233, 234, 235, 236, 238};
+double MultiIsotopeAtomAssay(cyclus::Composition::Ptr comp) {
+  return MultiIsotopeAtomFrac(comp, IsotopeToNucID(235));
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+double MultiIsotopeAtomAssay(cyclus::Material::Ptr rsrc) {
+  return MultiIsotopeAtomFrac(rsrc, IsotopeToNucID(235));
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+double MultiIsotopeAtomAssay(std::map<int,double> compmap) {
+  return MultiIsotopeAtomFrac(compmap, IsotopeToNucID(235));
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+double MultiIsotopeMassAssay(cyclus::Composition::Ptr comp) {
+  return MultiIsotopeMassFrac(comp, IsotopeToNucID(235));
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+double MultiIsotopeMassAssay(cyclus::Material::Ptr rsrc) {
+  return MultiIsotopeMassFrac(rsrc, IsotopeToNucID(235));
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+double MultiIsotopeMassAssay(std::map<int,double> compmap) {
+  return MultiIsotopeMassFrac(compmap, IsotopeToNucID(235));
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+double MultiIsotopeAtomFrac(cyclus::Composition::Ptr composition, 
+                            int isotope) {
+  return MultiIsotopeAtomFrac(composition->atom(), isotope);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+double MultiIsotopeAtomFrac(cyclus::Material::Ptr rsrc, int isotope) {
+  return MultiIsotopeAtomFrac(rsrc->comp(), isotope);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+double MultiIsotopeAtomFrac(std::map<int,double> compmap, int isotope) {
+  std::vector<int> isotopes;
+  IsotopesNucID(isotopes);
+  
   double isotope_assay;
   double uranium_atom_frac = 0;
-  
+
   // Get total uranium mole fraction, all non-uranium elements are not 
   // considered here as they are directly sent to the tails.
   for (int i : isotopes) {
-    int nuc_id = (92*1000 + i) * 10000;
-    uranium_atom_frac += mq.atom_frac(nuc_id);
+    uranium_atom_frac += compmap[i];
     if (i==isotope) {
-      isotope_assay = mq.atom_frac(nuc_id);
+      isotope_assay = compmap[i];
     }
   }
   isotope_assay /= uranium_atom_frac;
+  return isotope_assay;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+double MultiIsotopeMassFrac(cyclus::Composition::Ptr composition, 
+                            int isotope) {
+  return MultiIsotopeMassFrac(composition->mass(), isotope);
+}
   
-  return isotope_assay ;
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+double MultiIsotopeMassFrac(cyclus::Material::Ptr rsrc, int isotope) {
+  return MultiIsotopeMassFrac(rsrc->comp(), isotope);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-double MultiIsotopeMassFrac(Composition::Ptr composition, int isotope) {
-  int nuc_id = (92*1000 + isotope) * 10000; // isotope to unique NucID
-  std::map<int, double> v = composition->mass();
-  compmath::Normalize(&v);
-  return v[nuc_id];
-}
+double MultiIsotopeMassFrac(std::map<int,double> compmap, int isotope) {
+  std::vector<int> isotopes;
+  IsotopesNucID(isotopes);
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-double MultiIsotopeMassFrac(Material::Ptr rsrc, int isotope) {
-  MatQuery mq(rsrc);
-  const int isotopes[6] = {232, 233, 234, 235, 236, 238};
   double isotope_assay;
   double uranium_mass_frac = 0;
-  
+
   // Get total uranium mass fraction, all non-uranium elements are not 
   // considered here as they are directly sent to the tails.
   for (int i : isotopes) {
-    int nuc_id = (92*1000 + i) * 10000;
-    uranium_mass_frac += mq.mass_frac(nuc_id);
+    uranium_mass_frac += compmap[i];
     if (i==isotope) {
-      isotope_assay = mq.mass_frac(nuc_id);
+      isotope_assay = compmap[i];
     }
   }
-  isotope_assay /= uranium_atom_frac;
-  
-  return isotope_assay ;
+  isotope_assay /= uranium_mass_frac;
+  return isotope_assay;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 std::map<int,double> CalculateSeparationFactor(double alpha_235) {
+  std::vector<int> isotopes;
+  IsotopesNucID(isotopes);
   std::map<int,double> separation_factors;
   
   // Convert the product to feed separation factor to overall stage 
   // separation factor.
-  alpha_235 *= alpha_235
+  alpha_235 *= alpha_235;
   
   // We consider U-238 to be the key component hence the mass differences
   // are calculated with respect to this isotope.
-  for (int isotope = 232; isotope < 239; isotope++) {
-    if (isotope != 237) {
-      double delta_mass = 238. - isotope;
-      double alpha = 1. + delta_mass*(alpha_235-1.) / (238.-235.);
-      separation_factors[isotope] = alpha;
+  for (int i : isotopes) {
+    double delta_mass = 238. - NucIDToIsotope(i);
+    double alpha = 1. + delta_mass*(alpha_235-1.) / (238.-235.);
+    separation_factors[i] = alpha;
     }
-  }
   return separation_factors;
 }
+
+} // namespace mbmore

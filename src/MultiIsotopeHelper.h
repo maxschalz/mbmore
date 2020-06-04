@@ -2,17 +2,34 @@
 #define MBMORE_SRC_MULTI_ISOTOPE_HELPER_H_
 
 #include <map>
+#include <vector>
 
-#include "cyclus.h"
+#include "composition.h"
+#include "material.h"
 
 namespace mbmore {
 
-double MultiIsotopeAssayAtom(Material::Ptr rsrc);
-double MultiIsotopeAssayMass(Material::Ptr rsrc);
-double MultiIsotopeAtomFrac(Composition::Ptr rsrc, int isotope);
-double MultiIsotopeAtomFrac(Material::Ptr rsrc, int isotope);
-double MultiIsotopeMassFrac(Composition::Ptr rsrc, int isotope);
-double MultiIsotopeMassFrac(Material::Ptr rsrc, int isotope);
+void IsotopesNucID(std::vector<int> &isotopes);
+int IsotopeToNucID(int isotope);
+int NucIDToIsotope(int nuc_id);
+
+double MultiIsotopeAtomAssay(cyclus::Composition::Ptr comp);
+double MultiIsotopeAtomAssay(cyclus::Material::Ptr rsrc);
+double MultiIsotopeAtomAssay(std::map<int,double> compmap);
+
+double MultiIsotopeMassAssay(cyclus::Composition::Ptr comp);
+double MultiIsotopeMassAssay(cyclus::Material::Ptr rsrc);
+double MultiIsotopeMassAssay(std::map<int,double> compmap);
+
+double MultiIsotopeAtomFrac(cyclus::Composition::Ptr composition,
+                            int isotope);
+double MultiIsotopeAtomFrac(cyclus::Material::Ptr rsrc, int isotope);
+double MultiIsotopeAtomFrac(std::map<int,double> compmap, int isotope);
+
+double MultiIsotopeMassFrac(cyclus::Composition::Ptr composition, 
+                            int isotope);
+double MultiIsotopeMassFrac(cyclus::Material::Ptr rsrc, int isotope);
+double MultiIsotopeMassFrac(std::map<int,double> compmap, int isotope);
 
 // Calculates the stage separation factor for all isotopes starting from 
 // the given U235 product to feed separation factor.
