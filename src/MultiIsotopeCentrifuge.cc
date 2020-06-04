@@ -22,8 +22,29 @@ MultiIsotopeCentrifuge::MultiIsotopeCentrifuge() {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 MultiIsotopeCentrifuge::MultiIsotopeCentrifuge(
     double velocity, double height, double diameter, double temperature, 
+    double x, double machine_feed, double countercurrent_to_feed, 
+    double eff) {
+  
+  velocity = velocity;
+  height = height;
+  diameter = diameter;
+  temperature = temperature;
+
+  x = x;
+  machine_feed = machine_feed;
+  countercurrent_to_feed = countercurrent_to_feed;
+
+  eff = eff;
+  molar_mass = 0.352;           // kg mol^-1, molar mass of UF6 with U238
+  delta_molar_mass = 0.003;     // kg mol^-1, molar mass difference between
+                                // U235 and U238
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+MultiIsotopeCentrifuge::MultiIsotopeCentrifuge(
+    double velocity, double height, double diameter, double temperature, 
     double x, double machine_feed, double countercurrent_to_feed,
-    double eff, double molar_mass, double delta_molar_mass) {
+    double eff, double molar_mass = 0.352, double delta_molar_mass = 0.003) {
   
   velocity = velocity;
   height = height;
@@ -37,6 +58,25 @@ MultiIsotopeCentrifuge::MultiIsotopeCentrifuge(
   eff = eff;
   molar_mass = molar_mass;
   delta_molar_mass = delta_molar_mass;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+MultiIsotopeCentrifuge MultiIsotopeCentrifuge::operator= (
+    const MultiIsotopeCentrifuge &centrifuge) {
+  MultiIsotopeCentrifuge cent;
+
+  cent.delta_molar_mass = centrifuge.delta_molar_mass;
+  cent.molar_mass = centrifuge.molar_mass;
+  cent.x = centrifuge.x;
+  cent.countercurrent_to_feed = centrifuge.countercurrent_to_feed;
+  cent.velocity = centrifuge.velocity;
+  cent.height = centrifuge.height;
+  cent.diameter = centrifuge.diameter;
+  cent.machine_feed = centrifuge.machine_feed;
+  cent.temperature = centrifuge.temperature;
+  cent.eff = centrifuge.eff;
+
+  return cent;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

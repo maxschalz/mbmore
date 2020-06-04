@@ -8,11 +8,16 @@ namespace mbmore {
 class MultiIsotopeCentrifuge {
  public:
   MultiIsotopeCentrifuge();
+  MultiIsotopeCentrifuge(double velocity, double height, double diameter, 
+                         double temperature, double x, double machine_feed,
+                         double countercurrent_to_feed, double eff);
   MultiIsotopeCentrifuge(double velocity, double height, double diameter,
-                         double machine_feed, double temperature, double eff,
-                         double molar_mass, double delta_molar_mass, 
-                         double x, double countercurrent_to_feed);
-  
+                         double machine_feed, double temperature, 
+                         double eff, double molar_mass, 
+                         double delta_molar_mass, double x, 
+                         double countercurrent_to_feed);
+  MultiIsotopeCentrifuge operator= (const MultiIsotopeCentrifuge&);
+
   double ComputeDeltaU(double cut);
 
   double delta_molar_mass;
