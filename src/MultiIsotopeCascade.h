@@ -28,8 +28,8 @@ class MultiIsotopeCascade {
   //                  context()->GetRecipe(feed_recipe))
   MultiIsotopeCentrifuge centrifuge;
   std::map<int, MultiIsotopeStage> stage_config;
-  int n_enriching;
-  int n_stripping;
+  double n_enriching;
+  double n_stripping;
 
   std::map<int,double> feed_composition;
   std::map<int,double> product_composition;
@@ -42,9 +42,9 @@ class MultiIsotopeCascade {
 
   double precision;
   
-  void CalculateNStages();
   void BuildIdealCascade();
-  double CalculateConcentrations(double n_enriching, double n_stripping);
+  void CalculateNStages(double &n_stages);
+  double CalculateConcentrations();
   double ConcentrationDifference();
 
 };

@@ -3,12 +3,14 @@
 #include <cmath>
 #include <map>
 
+#include "error.h"
+
 namespace mbmore {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 MultiIsotopeCascade::MultiIsotopeCascade() 
-    : n_enriching(0),
-      n_stripping(0),
+    : n_enriching(1),
+      n_stripping(1),
       n_centrifuges(0),
       cascade_feed(0),
       design_product_assay(0),
@@ -38,25 +40,62 @@ MultiIsotopeCascade::MultiIsotopeCascade(MultiIsotopeCentrifuge centrifuge,
 
   cascade_feed = max_cascade_feed;
   n_centrifuges = max_centrifuges;
-  n_enriching = 0;
-  n_stripping = 0;
+  n_enriching = 1;
+  n_stripping = 1;
 
   precision = precision;
-
-  // BuildCascade;
+  
+  BuildIdealCascade();
   // ScaleCascade;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-void MultiIsotopeCascade::CalculateNStages() {
-  // TODO include code for optimisation, e.g., L-BFGS-B
-  CalculateConcentrations(n_enriching, n_stripping);
+void MultiIsotopeCascade::BuildIdealCascade() {
+  // Determine the number of stages in enriching and stripping section.
+  CalculateNStages(n_enriching);
+  CalculateNStages(n_stripping);
   
+  std::map<int,MultiIsotopeStage> ideal_stages;
+  
+  // TODO complete initialisation of stage
+  MultiIsotopeStage stage();
+  double alpha, delta_U;
+  
+  int i = 0;
+  while (i < n_enriching) {
+    
+    i++;
+  }
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-double MultiIsotopeCascade::CalculateConcentrations(double n_enriching,
-                                                    double n_stripping) {
+void MultiIsotopeCascade::CalculateNStages(double &n_stages) {
+  const double iter_max = 100;
+  const double eps = 1e-4;
+  double delta = 1e299;
+  double previous_delta;
+  
+  n_stages = 0;
+  do {
+    n_stages++;
+    previous_delta = delta;
+    delta = CalculateConcentrations();
+  } while (delta < previous_delta && n_stages != iter_max);
+  if (n_stages == iter_max) {
+    throw cyclus::Error("Unable to determine the number of stages!");
+  }
+  n_stages = n_stages - (1+eps);
+  n_stages = previous_delta > CalculateConcentrations()
+             ? n_stages + eps : n_stages + (1+eps);
+
+  // ensure that the number of stages is an integer (stored as double)
+  if (std::fmod(n_stages, 1.) < 1e-9) {
+    throw cyclus::ValueError("n_stages is not a whole number!");
+  }
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+double MultiIsotopeCascade::CalculateConcentrations() {
   // Calculates gamma = alpha*beta for all isotopes.
   // Variable naming follows E. von Halle, the equation numbers also refer
   // to his article.
