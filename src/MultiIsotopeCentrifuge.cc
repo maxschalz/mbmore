@@ -13,7 +13,7 @@ MultiIsotopeCentrifuge::MultiIsotopeCentrifuge() {
   x = 1000;
   machine_feed = 12.6e-6;     // kg s^-1
   countercurrent_to_feed = 2;
-  
+
   eff = 1;
   delta_molar_mass = 0.003;   // kg mol^-1, M(U238) - M(U235)
   molar_mass = 0.352;         // kg mol^-1, M(UF6) with U238
@@ -38,6 +38,7 @@ MultiIsotopeCentrifuge::MultiIsotopeCentrifuge(
   molar_mass = 0.352;           // kg mol^-1, molar mass of UF6 with U238
   delta_molar_mass = 0.003;     // kg mol^-1, molar mass difference between
                                 // U235 and U238
+
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -97,23 +98,26 @@ double MultiIsotopeCentrifuge::ComputeDeltaU(double cut) {
   // The factor molar_mass_238 / molar_mass assumes that UF6 is composed
   // of U238 and 6 F19 atoms. It stems from the fact that only the uranium
   // part of UF6 is getting enriched. The U238 assumption is only valid at
-  // low enrichment levels.
+  // low enrichment levels. For the same reason, the feed has to be scaled
+  // with this factor.
   // TODO CALCULATE ATOMIC MASS FROM FEED ASSAY
+  double machine_feed_U = machine_feed * molar_mass_238 / molar_mass;
   double factor_a = -2. * M_PI * D_rho * molar_mass_238 / molar_mass
                     / std::log(r1_over_r2);
-  double A_p = factor_a * cut / machine_feed / (1.+countercurrent_to_feed)
+  double A_p = factor_a * cut / machine_feed_U 
+               / (1.+countercurrent_to_feed) 
                / (1.-cut+countercurrent_to_feed);
-  double A_w = factor_a * (1.-cut) / machine_feed / countercurrent_to_feed
-               / (1.-cut+countercurrent_to_feed);
+  double A_w = factor_a * (1.-cut) / machine_feed_U 
+               / countercurrent_to_feed / (1.-cut+countercurrent_to_feed);
   
-  // Calculate the optimum rectifier length, i.e., position of the feed point
-  // with respect to the position of the product scoop.
+  // Calculate the optimum rectifier length, i.e., position of the feed 
+  // point with respect to the position of the product scoop.
   double rectifier_length = (1-cut) * (1+countercurrent_to_feed) * height
                             / (1-cut+countercurrent_to_feed);
   
   double deltaU_1 = 0.5 * delta_molar_mass * std::pow(velocity,2.)
                     / gas_constant / temperature;
-  double deltaU_line1 = 0.5 * machine_feed * cut * (1-cut) * std::pow(deltaU_1, 2.)
+  double deltaU_line1 = 0.5 * machine_feed_U * cut * (1-cut) * std::pow(deltaU_1, 2.)
                         * std::pow(r2/radius, 4.)
                         * std::pow(1. - std::pow(r1_over_r2, 2.), 2.);
   double deltaU_line2 = (1.+countercurrent_to_feed) / cut
