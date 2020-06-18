@@ -10,9 +10,9 @@
 #USE_CYCLUS("mbmore" "CascadeEnrich")
 
 #USE_CYCLUS("mbmore" "MultiIsotopeEnrich")
-USE_CYCLUS("mbmore" "MultiIsotopeCascade")
-USE_CYCLUS("mbmore" "MultiIsotopeStage")
-USE_CYCLUS("mbmore" "MultiIsotopeCentrifuge")
+#USE_CYCLUS("mbmore" "MultiIsotopeCascade")
+#USE_CYCLUS("mbmore" "MultiIsotopeStage")
+#USE_CYCLUS("mbmore" "MultiIsotopeCentrifuge")
 USE_CYCLUS("mbmore" "MultiIsotopeHelper")
 
 #USE_CYCLUS("mbmore" "RandomSink")
