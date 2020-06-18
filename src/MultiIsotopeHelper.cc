@@ -1,8 +1,6 @@
 #include "MultiIsotopeHelper.h"
 
 #include <algorithm>
-#include <map>
-#include <vector>
 
 #include "error.h"
 
@@ -93,9 +91,11 @@ double MultiIsotopeAtomFrac(std::map<int,double> compmap, int isotope) {
   // Get total uranium mole fraction, all non-uranium elements are not 
   // considered here as they are directly sent to the tails.
   for (int i : isotopes) {
-    uranium_atom_frac += compmap[i];
-    if (i==isotope) {
-      isotope_assay = compmap[i];
+    if (compmap.find(i) != compmap.end()) {
+      uranium_atom_frac += compmap.at(i);
+      if (i==isotope) {
+        isotope_assay = compmap.at(i);
+      }
     }
   }
   isotope_assay /= uranium_atom_frac;
@@ -124,9 +124,11 @@ double MultiIsotopeMassFrac(std::map<int,double> compmap, int isotope) {
   // Get total uranium mass fraction, all non-uranium elements are not 
   // considered here as they are directly sent to the tails.
   for (int i : isotopes) {
-    uranium_mass_frac += compmap[i];
-    if (i==isotope) {
-      isotope_assay = compmap[i];
+    if (compmap.find(i) != compmap.end()) {
+      uranium_mass_frac += compmap.at(i);
+      if (i==isotope) {
+        isotope_assay = compmap.at(i);
+      }
     }
   }
   isotope_assay /= uranium_mass_frac;
